@@ -5,13 +5,16 @@ import { APP_SECRET } from "../utils.js";
 
 export async function post(parent, arg, context, info) {
   const { userId } = context;
- return await context.prisma.link.create({
+  const newLink = await context.prisma.link.create({
     data: {
       description: arg.description,
       url: arg.url,
       postedBy: { connect: { id: userId } },
     },
   });
+  context.pubsub.publish("NEW_LINK", newLink);
+  
+  return newLink;
 }
 
 export async function signup(parent, arg, context, info) {
@@ -32,7 +35,9 @@ export async function signup(parent, arg, context, info) {
 }
 
 export async function login(parent, arg, context, info) {
-  const user = await context.prisma.user.findUnique({ where: { email: arg.email } });
+  const user = await context.prisma.user.findUnique({
+    where: { email: arg.email },
+  });
   if (!user) {
     throw new Error("User not found");
   }
