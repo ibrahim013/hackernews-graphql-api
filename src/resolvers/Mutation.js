@@ -13,7 +13,7 @@ export async function post(parent, arg, context, info) {
     },
   });
   context.pubsub.publish("NEW_LINK", newLink);
-  
+
   return newLink;
 }
 
@@ -54,4 +54,30 @@ export async function login(parent, arg, context, info) {
   };
 }
 
-export default { post, signup, login };
+export async function vote(parent, arg, context, info) {
+  const { userId } = context;
+
+  const vote = await context.prisma.vote.findUnique({
+    where: {
+      linkId_userId: {
+        linkId: +arg.linkId,
+        userId: userId,
+      },
+    },
+  });
+
+  if (Boolean(vote)) {
+    throw new Error(`Already voted for link ${arg.linkId}`);
+  }
+
+  const newVote = context.prisma.vote.create({
+    data: {
+      user: { connect: { id: userId } },
+      link: { connect: { id: Number(arg.linkId) } },
+    },
+  });
+  context.pubsub.publish("NEW_VOTE", newVote);
+
+  return newVote;
+}
+export default { post, signup, login, vote };

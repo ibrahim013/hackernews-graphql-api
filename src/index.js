@@ -9,6 +9,7 @@ import Mutation from "./resolvers/Mutation.js";
 import User from "./resolvers/User.js";
 import Link from "./resolvers/Link.js";
 import Subscription from "./resolvers/Subscription.js";
+import Vote from "./resolvers/Vote.js";
 
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
@@ -23,6 +24,7 @@ const resolvers = {
   Subscription,
   User,
   Link,
+  Vote,
 };
 
 const server = new ApolloServer({
